@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="OFF">         <!-- log4j 2的配置文件  注意名字必须是log4j2.xml，否则找不到-->
+  <appenders>     
+    <Console name="Console" target="SYSTEM_OUT">         <!-- 输出控制台的配置 -->
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>   <!-- 输出日志的格式 -->
+      <ThresholdFilter level="info" onMatch="ACCEPT" onmisMatch="DENY" />    <!-- 添加输出到控制台的过滤器(如果这里添加了下面logger可以考虑不添加)提前筛选 -->
+    </Console>
+    <File name="File" fileName="log/test.log" append="false">
+   	  <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>   <!-- 输出所有信息到该文件中，每次输出都重写文件，因为append设置为false --> 
+    </File>
+    <RollingFile name="RollFile" fileName="logs/app.log"     
+     	filePattern="logs/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">   <!--  -->
+    	 <!--这个会打印出所有的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档-->
+    	<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+    	<SizeBasedTriggeringPolicy size="5MB"/>
+    </RollingFile>
+  </appenders>
+  
+  
+  <loggers>                  <!-- 只要一个Logger它找到最属于它特征的logger,就行了，如果找不到就继承于root节点 -->
+  	<root level="error">     <!-- 所有的Logger如果没有明确指定继承于（或直接属于），那么都继承与root节点的特征 -->
+      <appender-ref ref="Console"/> <!--这里ref指的是上面appenders节点下定义的name 输出到哪 -->
+    </root>
+  	<logger name="log4j" level="trace" additivity="true">   <!-- 定义logger，像这里的logger，Test和Test1都继承于这个节点的特征 -->
+  		<appender-ref ref="Console"/>						<!-- 这里additivity设置为true，则符合条件的信息都会输出两遍，因为它既符合root，又符合此节点 -->
+  	</logger>
+  	<logger name="log4j.Test1" level="error" additivity="false">   <!-- 这里就指明了Test1直接属于这个logger的配置,这里additivity设置为false信息就不会重复 -->
+  		<appender-ref ref="Console" />               <!-- 这里additivity设置为false，则符合条件的信息都会输出3遍，因为它既符合root，又符合上面那个节点，又符合此节点 -->
+  	</logger>
+  	<logger name="log4j.TestFinal" level="trace" additivity="false">
+  		<appender-ref ref="Console" />
+  		<appender-ref ref="File" />    <!-- 输出到文件中 -->
+  		<appender-ref ref="RollFile" />
+  	</logger>
+ 	
+  </loggers>
+</configuration>
